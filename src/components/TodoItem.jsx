@@ -1,15 +1,15 @@
 import React from "react";
 
-export function TodoItem({ todo, toggleTodo }) {
-  const { id, task, completed } = todo;
+export function TodoItem({ lista, toggleTask }) {
+  const { id, task, completed } = lista;
 
-  const handleTodoClick = () => {
-    toggleTodo(id);
+  const handleTaskClick = () => {
+    toggleTask(id);
   };
 
   return (
     <li>
-      <input type="checkbox" checked={completed} onChange={handleTodoClick} />
+      <input type="checkbox" checked={completed} onChange={handleTaskClick} />
       {task}
     </li>
   );

@@ -1,58 +1,73 @@
 import React, { Fragment, useState, useRef, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { TodoList } from "./components/TodoList";
-import "./index.css";
-
-const KEY = "todoApp.todos";
 
 export function App() {
-  const todoTaskRef = useRef();
-  const [todos, setTodos] = useState([
-    { id: 1, task: "Tarea ", completed: false },
+  // listas: estado
+  // setListas: modificador del estado
+  const [listas, setListas] = useState([
+    { id: 1, task: "Tarea 1", completed: false },
   ]);
 
+  //Referencia para obtener a la data ingresada y usarla en el handle
+  const taskRef = useRef();
+
+  //Para escuchar y guardar las nuevas tareas creadas
   useEffect(() => {
-    const storedTodos = JSON.parse(localStorage.getItem(KEY));
-    if (storedTodos) {
-      setTodos(storedTodos);
+    localStorage.setItem("listApp.lists", JSON.stringify(listas));
+  }, [listas]);
+
+  //Para visualizar aquellas tareas que ya se encuentren creadas
+  useEffect(() => {
+    //Obtener tareas guardadas
+    const storedTasks = JSON.parse(localStorage.getItem("listApp.lists"));
+    //Validar que existan,
+    if (storedTasks) {
+      setListas(storedTasks);
     }
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem(KEY, JSON.stringify(todos));
-  }, [todos]);
-
-  const toggleTodo = (id) => {
-    const newTodos = [...todos];
-    const todo = newTodos.find((todo) => todo.id === id);
-    todo.completed = !todo.completed;
-    setTodos(newTodos);
+  const toggleTask = (id) => {
+    //copia de las tareas
+    const newTasks = [...listas];
+    //encontrar tarea seleccionada, según su id
+    const task = newTasks.find((task) => task.id === id);
+    task.completed = !task.completed; // si es true se convierte en false, si es false se convierte en true
+    setListas(newTasks); //actualizamos el listado de tareas
   };
 
-  const handleTodoAdd = (event) => {
-    const task = todoTaskRef.current.value;
+  //Método para añadir tareas
+  const handleTaskAdd = () => {
+    const task = taskRef.current.value;
+    // En caso de que la data sea vacia no realizamos nada
     if (task === "") return;
 
-    setTodos((prevTodos) => {
-      return [...prevTodos, { id: uuidv4(), task, completed: false }];
+    //En caso de recibir información, creamos un nuevo
+    //elemento y hacemos cambios sobre el estado
+    setListas((prevTasks) => {
+      return [...prevTasks, { id: uuidv4(), task, completed: false }];
     });
-
-    todoTaskRef.current.value = null;
+    taskRef.current.value = null; //Limpia el input cuando se añade
   };
 
+  //Método para eliminar tareas
   const handleClearAll = () => {
-    const newTodos = todos.filter((todo) => !todo.completed);
-    setTodos(newTodos);
+    //Hacemos una copia de las tareas creadas y
+    // filtramos por aquellas que han sido seleccionadas
+    const newTasks = listas.filter((task) => !task.completed);
+    // Utilizamos setListas para setear los elementos,
+    setListas(newTasks);
   };
 
   return (
+    // Fragment se utiliza como padre para englobar varios elementos.
     <Fragment>
-      <TodoList todos={todos} toggleTodo={toggleTodo} />
-      <input ref={todoTaskRef} type="text" placeholder="Nueva tarea" />
-      <button onClick={handleTodoAdd}>Añadir</button>
-      <button onClick={handleClearAll}>Eliminar</button>
+      <TodoList listas={listas} toggleTask={toggleTask} />
+      <input ref={taskRef} type="text" placeholder="Nueva Tarea" />
+      <button onClick={handleTaskAdd}>+</button>
+      <button onClick={handleClearAll}>-</button>
       <div>
-        Te quedan {todos.filter((todo) => !todo.completed).length} tareas por
+        Te quedan {listas.filter((task) => !task.completed).length} tareas por
         terminar
       </div>
     </Fragment>
